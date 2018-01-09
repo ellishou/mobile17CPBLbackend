@@ -5,6 +5,8 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res) {
+	console.log('req.query',req.query);
+	console.log('req.query.sort',req.query.sort);
 	// var sql = " SELECT "+
 	// 		" f.YearMonth as '年度月份', "+
 	// 		" f.PlayerName as'球員名稱', "+
@@ -71,7 +73,9 @@ router.get('/', function(req, res) {
 			"  res.Ev AS '評價',  "+
 			"  res.LevelName AS '卡片等級',  "+
 			"  res.Team AS '隊伍',  "+
-			"  res.Dpv AS '守備適性' from  "+
+			"  res.Dpv AS '守備適性', "+
+			"  res.Style AS '姿勢' "+
+			" from  "+
 			" (SELECT  "+
 			"  f.ID ,  "+
 			"  f.YearMonth ,  "+
@@ -83,6 +87,7 @@ router.get('/', function(req, res) {
 			"  f.Agi ,  "+
 			"  f.Def ,  "+
 			"  f.Pass ,  "+
+			"  f.Style ,  "+
 			"  FLOOR((f.HitL+f.HitR+f.Pow+f.Eye+f.Agi+f.Def+f.Pass)/7) as 'Ev',  "+
 			"  pl.LevelName ,  "+
 			"  GROUP_CONCAT(DISTINCT t.TeamNameAlias) AS 'Team',  "+
@@ -101,6 +106,10 @@ router.get('/', function(req, res) {
 			" WHERE  "+
 			"  f.PlayerLevel = pl.ID  "+
 			" GROUP BY f.ID , pl.ID) as res  ";
+	if(req.query.sort){
+		var sort = req.query.sort.split("|");
+		sql += " Order BY "+sort[0]+" "+sort[1];
+	}
 
 	//console.log(sql);
 	myDB.query(sql,function(err, results) {
