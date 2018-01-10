@@ -4,7 +4,63 @@ var express = require('express');
 var router = express.Router();
 
 /* GET home page. */
+
+// "total": 200,
+// "per_page": 15,
+// "current_page": 1,
+// "last_page": 14,
+// "next_page_url": "http://vuetable.ratiw.net/api/users?page=2",
+// "prev_page_url": null,
+// "from": 1,
+// "to": 15,
+//http://vuetable.ratiw.net/api/users?page=2&per_page=30
+
 router.get('/', function(req, res) {
+	var sort = "";
+	var per_page = "";
+	var current_page = "";
+	var last_page = "";
+	var next_page_url = "";
+	var prev_page_url = "";
+	var from = "";
+	var to = "";
+	var total = ""
+
+	var sql_count = " select "+
+			"  count(res.ID) as count  "+
+			" from  "+
+			" (SELECT  "+
+			"  f.ID ,  "+
+			"  f.YearMonth ,  "+
+			"  f.PlayerName ,  "+
+			"  f.HitL ,  "+
+			"  f.HitR ,  "+
+			"  f.Pow ,  "+
+			"  f.Eye ,  "+
+			"  f.Agi ,  "+
+			"  f.Def ,  "+
+			"  f.Pass ,  "+
+			"  f.Style ,  "+
+			"  FLOOR((f.HitL+f.HitR+f.Pow+f.Eye+f.Agi+f.Def+f.Pass)/7) as 'Ev',  "+
+			"  pl.LevelName ,  "+
+			"  GROUP_CONCAT(DISTINCT t.TeamNameAlias) AS 'Team',  "+
+			"  GROUP_CONCAT(p.PositionName, '-', fp.Value) AS 'Dpv'  "+
+			" FROM  "+
+			"  playerlevel pl,  "+
+			"  fielder f  "+
+			"      LEFT JOIN  "+
+			"  fielderposition fp ON f.ID = fp.FielderID  "+
+			"      LEFT JOIN  "+
+			"  fielderteam ft ON f.ID = ft.FielderID  "+
+			"      LEFT JOIN  "+
+			"  dposition p ON fp.PositionID = p.ID  "+
+			"      LEFT JOIN  "+
+			"  team t ON ft.TeamID = t.ID  "+
+			" WHERE  "+
+			"  f.PlayerLevel = pl.ID  "+
+			" GROUP BY f.ID , pl.ID) as res  ";
+
+
 	var sql = " select "+
 			"  res.ID as id,  "+
 			"  res.YearMonth AS '年度月份',  "+
@@ -52,10 +108,37 @@ router.get('/', function(req, res) {
 			" WHERE  "+
 			"  f.PlayerLevel = pl.ID  "+
 			" GROUP BY f.ID , pl.ID) as res  ";
+
 	if(req.query.sort){
-		var sort = req.query.sort.split("|");
-		sql += " Order BY "+sort[0]+" "+sort[1];
+		sort = req.query.sort.split("|");
+		sql += " Order BY " + sort[0] + " " + sort[1] ;
 	}
+
+	if(req.query.per_page){
+		per_page = req.query.per_page;
+	}
+
+	if(req.query.page){
+		current_page = req.query.page;
+	}
+	//limit calculate
+	sql += " limit " + per_page * (current_page -1) + " , " + per_page * (current_page)
+
+	myDB.query(sql_count,function(err, results) {
+	    if(err) 
+		{ 
+			res.send({
+	    		"api_result" : 1,
+	    		"data" : err
+	    	});
+			return;
+	    	// Respond with results as JSON
+		}else{
+			//control value
+			console.log(results);
+			total = results.count ;
+		}
+	});
 
 	myDB.query(sql,function(err, results) {
 	    if(err) 
@@ -67,8 +150,15 @@ router.get('/', function(req, res) {
 			return;
 	    	// Respond with results as JSON
 		}else{
+			last_page = total / per_page ;
+
+
 	    	res.send({
 	    		"api_result" : 0,
+	    		"total": total,
+	    		"current_page":current_page,
+	    		"per_page":per_page,
+				"last_page": last_page,
 	    		"data" : results
 	    	});
 		}
