@@ -24,7 +24,9 @@ router.get('/', function(req, res) {
 	var prev_page_url = "";
 	var from = "";
 	var to = "";
-	var total = ""
+	var total = "";
+	var next_page_url = "";
+	var prev_page_url = "";
 
 	var sql_count = " select "+
 			"  count(res.ID) as count  "+
@@ -122,7 +124,11 @@ router.get('/', function(req, res) {
 		current_page = req.query.page;
 	}
 	//limit calculate
-	sql += " limit " + per_page * (current_page -1) + " , " + per_page * (current_page)
+	var from = per_page * (current_page -1) ;
+	var to = per_page * (current_page);
+	sql += " limit " + (current_page-1) * per_page + " , " + per_page
+
+
 
 	myDB.query(sql_count,function(err, results) {
 	    if(err) 
@@ -134,9 +140,7 @@ router.get('/', function(req, res) {
 			return;
 	    	// Respond with results as JSON
 		}else{
-			//control value
-			console.log(results);
-			total = results.count ;
+			total = results[0].count;
 		}
 	});
 
@@ -150,8 +154,19 @@ router.get('/', function(req, res) {
 			return;
 	    	// Respond with results as JSON
 		}else{
-			last_page = total / per_page ;
+			//page calculate
+			last_page = Math.ceil(total / per_page) ;
+			if(parseInt(current_page,10) != 1){
+				prev_page_url = req.headers.host+"/api/filder/?per_page="+per_page+"&page="+(parseInt(current_page,10)-1);
+			}else{
+				prev_page_url = null
+			}
 
+			if((parseInt(current_page,10)+1) <= last_page){
+				next_page_url = req.headers.host+"/api/filder/?per_page="+per_page+"&page="+(parseInt(current_page,10)+1);
+			}else{
+				next_page_url = null;
+			}
 
 	    	res.send({
 	    		"api_result" : 0,
@@ -159,6 +174,10 @@ router.get('/', function(req, res) {
 	    		"current_page":current_page,
 	    		"per_page":per_page,
 				"last_page": last_page,
+				"from": from+1,
+				"to": to,
+				"prev_page_url":prev_page_url,
+				"next_page_url":next_page_url,
 	    		"data" : results
 	    	});
 		}
