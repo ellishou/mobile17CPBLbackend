@@ -12,6 +12,7 @@ var fielder = require('./routes/fielder');
 var playerlevel = require('./routes/playerlevel');
 var team = require('./routes/team');
 var dposition = require('./routes/dposition');
+var img = require('./routes/img');
 
 // var myDB = require('./DBHelper');
 
@@ -35,6 +36,7 @@ app.use('/api/fielder', fielder);
 app.use('/api/playerlevel', playerlevel);
 app.use('/api/team', team);
 app.use('/api/dposition', dposition);
+app.use('/api/img', img);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
