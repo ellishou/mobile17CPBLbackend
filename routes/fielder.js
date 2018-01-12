@@ -78,6 +78,7 @@ router.get('/', function(req, res) {
 			"  res.LevelName AS '卡片等級',  "+
 			"  res.Team AS '隊伍',  "+
 			"  res.Dpv AS '守備適性', "+
+			"  res.ImgUrl , "+
 			"  res.Style AS '姿勢' "+
 			" from  "+
 			" (SELECT  "+
@@ -92,6 +93,7 @@ router.get('/', function(req, res) {
 			"  f.Def ,  "+
 			"  f.Pass ,  "+
 			"  f.Style ,  "+
+			"  f.ImgUrl ,  "+
 			"  FLOOR((f.HitL+f.HitR+f.Pow+f.Eye+f.Agi+f.Def+f.Pass)/7) as 'Ev',  "+
 			"  pl.LevelName ,  "+
 			"  GROUP_CONCAT(DISTINCT t.TeamNameAlias) AS 'Team',  "+
