@@ -59,8 +59,8 @@ router.get('/', function(req, res) {
 			"      LEFT JOIN  "+
 			"  team t ON ft.TeamID = t.ID  "+
 			" WHERE  "+
-			"  f.PlayerLevel = pl.ID  "+
-			" GROUP BY f.ID , pl.ID) as res  ";
+			"  f.PlayerLevel = pl.ID  ";
+
 
 
 	var sql = " select "+
@@ -110,8 +110,31 @@ router.get('/', function(req, res) {
 			"      LEFT JOIN  "+
 			"  team t ON ft.TeamID = t.ID  "+
 			" WHERE  "+
-			"  f.PlayerLevel = pl.ID  "+
-			" GROUP BY f.ID , pl.ID) as res  ";
+			"  f.PlayerLevel = pl.ID  ";
+	console.log(req.query);
+	if(req.query.player && req.query.player != 'all'){
+		sql += " and f.PlayerName like '%" + req.query.player + "%' ";
+		sql_count += " and f.PlayerName like '%" + req.query.player + "%' ";
+	}
+	
+	if(req.query.team && req.query.team != 'all'){
+		sql += " and t.ID in (" + req.query.team + ") ";
+		sql_count += " and t.ID in (" + req.query.team + ") ";
+	}
+
+	if(req.query.position && req.query.position != 'all'){
+		sql += " and p.ID in (" + req.query.position + ") ";
+		sql_count += " and p.ID in (" + req.query.position + ") ";
+	}
+
+	if(req.query.playerlevel && req.query.playerlevel != 'all'){
+		sql += " and pl.ID in (" + req.query.playerlevel + ") ";
+		sql_count += " and pl.ID in (" + req.query.playerlevel + ") ";
+	}
+
+	// " GROUP BY f.ID , pl.ID) as res  ";
+	sql += " GROUP BY f.ID , pl.ID ) as res  ";
+	sql_count += " GROUP BY f.ID , pl.ID) as res  ";
 
 	if(req.query.sort){
 		sort = req.query.sort.split("|");
@@ -125,6 +148,7 @@ router.get('/', function(req, res) {
 	if(req.query.page){
 		current_page = req.query.page;
 	}
+
 	//limit calculate
 	var from = per_page * (current_page -1) ;
 	var to = per_page * (current_page);
