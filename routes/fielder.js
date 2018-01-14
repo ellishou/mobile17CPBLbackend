@@ -114,7 +114,7 @@ router.get('/', function(req, res) {
 	console.log(req.query);
 	if(req.query.player && req.query.player != 'all'){
 		sql += " and f.PlayerName like '%" + req.query.player + "%' ";
-		sql_count += " and f.PlayerName like '%" + req.query.player + "%' ";
+		sql_count += " and f.PlayerName like '		%" + req.query.player + "%' ";
 	}
 	
 	if(req.query.team && req.query.team != 'all'){
@@ -209,6 +209,120 @@ router.get('/', function(req, res) {
 		}
 	});
 });
+
+router.post('/', function(req, res) {
+	console.log(req.body);
+	var insertId = "";
+	var insertPlayer = "INSERT "+
+						" INTO `mobilecpbl17`.`fielder` "+
+						" (`PlayerName`, "+
+						" `HitL`, "+
+						" `HitR`, "+
+						" `Pow`, "+
+						" `Eye`, "+
+						" `Agi`, "+
+						" `Def`, "+
+						" `Pass`, "+
+						" `YearMonth`, "+
+						" `PlayerLevel`, "+
+						" `Style`, "+
+						" `ImgUrl`) "+
+						" VALUES "+
+						" ( "+
+						" '"+req.body.PlayerName+"', "+
+						" "+req.body.HitL+", "+
+						" "+req.body.HitR+", "+
+						" "+req.body.Pow+", "+
+						" "+req.body.Eye+", "+
+						" "+req.body.Agi+", "+
+						" "+req.body.Def+", "+
+						" "+req.body.Def+", "+
+						" '"+req.body.Year+"', "+
+						" "+req.body.PlayerLevel+", "+
+						" '"+req.body.Style+"', "+
+						" '"+req.body.Img+"')";
+	// console.log(insertPlayer);
+
+	myDB.query(insertPlayer,function(err, results) {
+	    if(err) 
+		{ 
+			res.send({
+	    		"api_result" : 1,
+	    		"data" : err
+	    	});
+			return;
+	    	// Respond with results as JSON
+		}else{
+	    	insertId = results.insertId;
+    		//insert Position
+			var PositionSql = [];
+			for(pos of req.body.Position){
+				var sql = " INSERT INTO `mobilecpbl17`.`fielderposition` "+
+							" (`FielderID`, "+
+							" `PositionID`, "+
+							" `Value`) "+
+							" VALUES "+
+							" ( "+
+							" "+insertId+", "+
+							" "+pos.PID+", "+
+							" '"+pos.Value+"')";
+				PositionSql.push(sql);
+			}
+			console.log(PositionSql);
+
+    		//insert Team
+			var TeamSql = [];
+			for(team of req.body.Teams){
+				var sql = " INSERT INTO `mobilecpbl17`.`fielderteam` "+
+							" (`FielderID`, "+
+							" `TeamID`) "+
+							" VALUES "+
+							" ( "+
+							" "+insertId+", "+
+							" "+team.TID+")";
+				TeamSql.push(sql);
+			}
+			console.log(TeamSql);
+
+				for(psql of PositionSql){
+					myDB.query(psql,function(err, results) {
+						 if(err) 
+						{
+							res.send({
+					    		"api_result" : 1,
+					    		"data" : err
+					    	});
+							return;
+						}
+					});
+				}
+
+				for(tsql of TeamSql){
+					myDB.query(tsql,function(err, results) {
+						 if(err) 
+						{
+							res.send({
+					    		"api_result" : 1,
+					    		"data" : err
+					    	});
+							return;
+						}else{
+							res.send({
+					    		"api_result" : 0,
+					    		"data" : {
+					    			"Player":1,
+					    			"Position":PositionSql.length,
+					    			"Tems":TeamSql.length
+					    		}
+					    	});
+						}
+					});
+				}
+			}
+		}
+	});
+});
+
 module.exports = router;
 
 
