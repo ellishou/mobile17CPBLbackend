@@ -236,7 +236,7 @@ router.post('/', function(req, res) {
 						" "+req.body.Eye+", "+
 						" "+req.body.Agi+", "+
 						" "+req.body.Def+", "+
-						" "+req.body.Def+", "+
+						" "+req.body.Pass+", "+
 						" '"+req.body.Year+"', "+
 						" "+req.body.PlayerLevel+", "+
 						" '"+req.body.Style+"', "+
