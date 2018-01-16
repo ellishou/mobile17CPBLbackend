@@ -132,6 +132,11 @@ router.get('/', function(req, res) {
 		sql_count += " and pl.ID in (" + req.query.playerlevel + ") ";
 	}
 
+	if(req.query.style && req.query.style != 'false'){
+		sql += " and f.Style = 'Y' ";
+		sql_count += " and f.Style = 'Y' ";
+	}
+
 	// " GROUP BY f.ID , pl.ID) as res  ";
 	sql += " GROUP BY f.ID , pl.ID ) as res  ";
 	sql_count += " GROUP BY f.ID , pl.ID) as res  ";
