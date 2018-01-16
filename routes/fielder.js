@@ -219,7 +219,7 @@ router.post('/', function(req, res) {
 	console.log(req.body);
 	var insertId = "";
 	var insertPlayer = "INSERT "+
-						" INTO `mobilecpbl17`.`fielder` "+
+						" INTO fielder "+
 						" (`PlayerName`, "+
 						" `HitL`, "+
 						" `HitR`, "+
@@ -262,7 +262,7 @@ router.post('/', function(req, res) {
     		//insert Position
 			var PositionSql = [];
 			for(pos of req.body.Position){
-				var sql = " INSERT INTO `mobilecpbl17`.`fielderposition` "+
+				var sql = " INSERT INTO fielderposition "+
 							" (`FielderID`, "+
 							" `PositionID`, "+
 							" `Value`) "+
@@ -278,7 +278,7 @@ router.post('/', function(req, res) {
     		//insert Team
 			var TeamSql = [];
 			for(team of req.body.Teams){
-				var sql = " INSERT INTO `mobilecpbl17`.`fielderteam` "+
+				var sql = " INSERT INTO fielderteam "+
 							" (`FielderID`, "+
 							" `TeamID`) "+
 							" VALUES "+
@@ -291,6 +291,7 @@ router.post('/', function(req, res) {
 
 				for(psql of PositionSql){
 					myDB.query(psql,function(err, results) {
+						console.log('im Position');
 						 if(err) 
 						{
 							res.send({
@@ -304,6 +305,7 @@ router.post('/', function(req, res) {
 
 				for(tsql of TeamSql){
 					myDB.query(tsql,function(err, results) {
+						console.log('im Team');
 						 if(err) 
 						{
 							res.send({

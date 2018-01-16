@@ -51,18 +51,21 @@ function release(connection) {
 }
 
 exports.query = function(sql, callback) {
-  pool.getConnection(function(err, connection) {
-    if(err) { console.log(err); callback(true); return; }
-    // make the query
-    connection.query(sql, function(err, results) {
-      release(connection);
-      if(err) { 
-      	console.log(err); 
-      	callback(true); 
-      	return; 
-      }
-      console.log(results);
-      callback(false, results);
-    });
-  });
+
+      pool.getConnection(function(err, connection) {
+        if(err) { console.log(err); callback(true); return; }
+        // make the query
+        connection.query(sql, function(err, results) {
+          return new Promise(( resolve, reject ) => {
+                  release(connection);
+                  if(err) { 
+                  	console.log(err); 
+                  	resolve(callback(true)); 
+                  	return; 
+                  }
+                  console.log(results);
+                  resolve(callback(false, results));
+              });
+            }); 
+      });
 };
