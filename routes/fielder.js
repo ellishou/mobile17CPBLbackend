@@ -1,6 +1,7 @@
 
 var myDB = require('../DBHelper');
 var express = require('express');
+var common = require('../common');
 var router = express.Router();
 
 /* GET home page. */
@@ -135,6 +136,41 @@ router.get('/', function(req, res) {
 	if(req.query.style && req.query.style != 'false'){
 		sql += " and f.Style = 'Y' ";
 		sql_count += " and f.Style = 'Y' ";
+	}
+
+	if(req.query.year && req.query.year != 'all'){
+		var yearList = req.query.year.split(",");
+			sql += " and ( ";
+			sql_count += " and ( ";
+
+			var yearit = common.makeIterator(yearList);
+			while(!yearit.next().done){
+				var year = yearit.next().value;
+				sql += " f.YearMonth like '"+year+"%' ";
+				sql_count += " f.YearMonth like '"+year+"%' ";
+				if(!yearit.next().done){
+					sql += " or ";
+					sql_count += " or ";
+				}
+			}
+		// for (year of yearList){
+		// 	sql += " f.YearMonth like '"+year+"%' ";
+		// 	sql_count += " f.YearMonth like '"+year+"%' ";
+		// }
+			sql += " ) ";
+			sql_count += " ) ";
+	}
+
+	if(req.query.month && req.query.month != 'all'){
+		var monthList = req.query.month.split(",");
+			sql += " and ( ";
+			sql_count += " and ( ";
+		for (month of monthList){
+			sql += " f.YearMonth like '%"+month+"' ";
+			sql_count += " f.YearMonth like '%"+month+"' ";
+		}
+			sql += " ) ";
+			sql_count += " ) ";
 	}
 
 	// " GROUP BY f.ID , pl.ID) as res  ";
