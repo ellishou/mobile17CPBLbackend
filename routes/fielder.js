@@ -140,37 +140,46 @@ router.get('/', function(req, res) {
 
 	if(req.query.year && req.query.year != 'all'){
 		var yearList = req.query.year.split(",");
-			sql += " and ( ";
-			sql_count += " and ( ";
+		sql += " and ( ";
+		sql_count += " and ( ";
 
-			var yearit = common.makeIterator(yearList);
-			while(!yearit.next().done){
-				var year = yearit.next().value;
-				sql += " f.YearMonth like '"+year+"%' ";
-				sql_count += " f.YearMonth like '"+year+"%' ";
-				if(!yearit.next().done){
-					sql += " or ";
-					sql_count += " or ";
-				}
+		var yearit = common.makeIterator(yearList);
+		var year = yearit.next();
+		while(!year.done){
+			sql += " f.YearMonth like '"+year.value+"%' ";
+			sql_count += " f.YearMonth like '"+year.value+"%' ";
+
+			year = yearit.next();
+			if(!year.done){
+				sql += " or ";
+				sql_count += " or ";
 			}
-		// for (year of yearList){
-		// 	sql += " f.YearMonth like '"+year+"%' ";
-		// 	sql_count += " f.YearMonth like '"+year+"%' ";
-		// }
-			sql += " ) ";
-			sql_count += " ) ";
+		}
+
+		sql += " ) ";
+		sql_count += " ) ";
 	}
 
 	if(req.query.month && req.query.month != 'all'){
 		var monthList = req.query.month.split(",");
-			sql += " and ( ";
-			sql_count += " and ( ";
-		for (month of monthList){
-			sql += " f.YearMonth like '%"+month+"' ";
-			sql_count += " f.YearMonth like '%"+month+"' ";
+		sql += " and ( ";
+		sql_count += " and ( ";
+
+		var monthit = common.makeIterator(monthList);
+		var month = monthit.next();
+		while(!month.done){
+			sql += " f.YearMonth like '%"+month.value+"' ";
+			sql_count += " f.YearMonth like '%"+month.value+"' ";
+
+			month = monthit.next();
+			if(!month.done){
+				sql += " or ";
+				sql_count += " or ";
+			}
 		}
-			sql += " ) ";
-			sql_count += " ) ";
+
+		sql += " ) ";
+		sql_count += " ) ";
 	}
 
 	// " GROUP BY f.ID , pl.ID) as res  ";
@@ -181,6 +190,8 @@ router.get('/', function(req, res) {
 		sort = req.query.sort.split("|");
 		sql += " Order BY " + sort[0] + " " + sort[1] ;
 	}
+
+	console.log(sql);
 
 	if(req.query.per_page){
 		per_page = req.query.per_page;
